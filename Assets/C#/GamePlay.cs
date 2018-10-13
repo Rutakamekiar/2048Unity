@@ -1,20 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GamePlay : MonoBehaviour
 {
-    public GameObject elementObj;
+    public GameObject elementObj, panel;
+    public Text winOrLoseText;
     public static object[,] sceneElem;
     private static bool generateNew;
     private Vector2 startPos, endPos, direction;
     void Start()
     {
-        generateNew = true;
         sceneElem = new object[4, 4];
+        generateNew = true;
         GenerateElem();
     }
-
     void Update()
     {
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
@@ -171,17 +172,20 @@ public class GamePlay : MonoBehaviour
             GenerateElem();
         }
     }
-
     bool IsElement(int x, int y)
     {
-        //print(x + " " + y);
         if (sceneElem[x, y] is Element)
             return true;
         return false;
     }
     Element AsElement(int x, int y)
     {
-        return sceneElem[x, y] as Element;
+        if (IsElement(x, y))
+        {
+
+            return sceneElem[x, y] as Element;
+        }
+        else return null;
     }
     Vector2 ReturnNewObjPos(int x, int y)
     {
@@ -196,17 +200,17 @@ public class GamePlay : MonoBehaviour
             {
                 x = RerurnRandomPos();
                 y = RerurnRandomPos();
-                if (!(sceneElem[x, y] is Element))
+                if (!IsElement(x, y))
                 {
                     GameObject obj = ReturnNewGameObject(ReturnNewObjPos(x, y));
                     sceneElem[x, y] = new Element(obj, obj.transform.localPosition, 2);
                     generateNew = false;
-                    break;
-                }
-                else if (IsFullMatrix())
-                {
-                    print("full mass");
-                    generateNew = false;
+                    if (winOrLose())
+                    {
+                        winOrLoseText.text = "You lose!!!\nTry Again";
+                        winOrLoseText.gameObject.SetActive(true);
+                        panel.SetActive(true);
+                    }
                     break;
                 }
             }
@@ -219,7 +223,16 @@ public class GamePlay : MonoBehaviour
         {
             for (int j = 0; j < sceneElem.GetLength(1); j++)
             {
-                if (sceneElem[i, j] is Element) count++;
+                if (IsElement(i, j))
+                {
+                    count++;
+                    if (AsElement(i, j).number == 2048)
+                    {
+                        winOrLoseText.text = "You WIN!!!";
+                        winOrLoseText.gameObject.SetActive(true);
+                        panel.SetActive(true);
+                    }
+                }
                 if (sceneElem.GetLength(0) * sceneElem.GetLength(1) == count)
                 {
                     return true;
@@ -230,7 +243,7 @@ public class GamePlay : MonoBehaviour
     }
     int RerurnRandomPos()
     {
-        return Random.Range(0, 4);
+        return Random.Range(0, sceneElem.GetLength(0));
     }
     GameObject ReturnNewGameObject(Vector2 position)
     {
@@ -268,5 +281,41 @@ public class GamePlay : MonoBehaviour
                 }
             }
         }
+    }
+    bool winOrLose()
+    {
+        if (IsFullMatrix())
+        {
+            for (int i = 0; i < sceneElem.GetLength(0) - 1; i++)
+            {
+                for (int j = 0; j < sceneElem.GetLength(1) - 1; j++)
+                {
+                    if (AsElement(i, j).number == AsElement(i + 1, j).number)
+                    {
+                        return false;
+                    }
+                    if (AsElement(j, i).number == AsElement(j, i + 1).number)
+                    {
+                        return false;
+                    }
+                }
+            }
+            for (int i = sceneElem.GetLength(0) - 1; i > 0; i--)
+            {
+                for (int j = sceneElem.GetLength(1) - 1; j > 0; j--)
+                {
+                    if (AsElement(i, j).number == AsElement(i - 1, j).number)
+                    {
+                        return false;
+                    }
+                    if (AsElement(j, i).number == AsElement(j, i - 1).number)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }
