@@ -13,5 +13,6 @@ public class Element : MonoBehaviour{
         gameObj = obj;
         this.number = number;
         gameObj.GetComponent<Text>().text = number.ToString();
+        GamePlay.score += number;
     }
 }

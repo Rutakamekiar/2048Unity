@@ -6,15 +6,19 @@ using UnityEngine.UI;
 public class GamePlay : MonoBehaviour
 {
     public GameObject elementObj, panel;
-    public Text winOrLoseText;
-    public static object[,] sceneElem;
+    public Text winOrLoseText, scoreText, bestScore;
+    public static int score;
     private static bool generateNew;
+    public static object[,] sceneElem = new object[4, 4];
     private Vector2 startPos, endPos, direction;
     void Start()
     {
         sceneElem = new object[4, 4];
         generateNew = true;
-        GenerateElem();
+        score = 0;
+        Download();
+        if (score == 0)
+            GenerateElem();
     }
     void Update()
     {
@@ -149,7 +153,6 @@ public class GamePlay : MonoBehaviour
                             AA(i, j, 0, 1);
                         }
                     }
-
                 }
             }
             GenerateElem();
@@ -180,40 +183,52 @@ public class GamePlay : MonoBehaviour
     }
     Element AsElement(int x, int y)
     {
-        if (IsElement(x, y))
-        {
-
-            return sceneElem[x, y] as Element;
-        }
-        else return null;
+        return sceneElem[x, y] as Element;
     }
     Vector2 ReturnNewObjPos(int x, int y)
     {
         return new Vector2(x * 190, y * 190);
     }
+    GameObject ReturnNewGameObject(Vector2 position)
+    {
+        GameObject obj = Instantiate(elementObj, position, Quaternion.identity);
+        obj.transform.SetParent(GameObject.Find("GameObjs").transform);
+        obj.transform.localPosition = position;
+        obj.transform.localScale = obj.transform.lossyScale;
+        return obj;
+    }
+    int RerurnRandomPos()
+    {
+        return Random.Range(0, sceneElem.GetLength(0));
+    }
     void GenerateElem()
     {
-        if (generateNew)
+        if (generateNew && !IsFullMatrix())
         {
-            int x, y;
             while (true)
             {
-                x = RerurnRandomPos();
-                y = RerurnRandomPos();
+                int x = RerurnRandomPos();
+                int y = RerurnRandomPos();
                 if (!IsElement(x, y))
                 {
                     GameObject obj = ReturnNewGameObject(ReturnNewObjPos(x, y));
                     sceneElem[x, y] = new Element(obj, obj.transform.localPosition, 2);
                     generateNew = false;
-                    if (winOrLose())
+                    scoreText.text = score.ToString();
+                    if(System.Int32.Parse(bestScore.text) < score)
                     {
-                        winOrLoseText.text = "You lose!!!\nTry Again";
-                        winOrLoseText.gameObject.SetActive(true);
-                        panel.SetActive(true);
+                        bestScore.text = score.ToString();
                     }
                     break;
                 }
-            }
+            }            
+        }
+        if (winOrLose())
+        {
+            winOrLoseText.text = "You lose!!!\nTry Again";
+            winOrLoseText.gameObject.SetActive(true);
+            panel.SetActive(true);
+            BestRecordSaving();
         }
     }
     bool IsFullMatrix()
@@ -231,6 +246,7 @@ public class GamePlay : MonoBehaviour
                         winOrLoseText.text = "You WIN!!!";
                         winOrLoseText.gameObject.SetActive(true);
                         panel.SetActive(true);
+                        BestRecordSaving();
                     }
                 }
                 if (sceneElem.GetLength(0) * sceneElem.GetLength(1) == count)
@@ -241,23 +257,11 @@ public class GamePlay : MonoBehaviour
         }
         return false;
     }
-    int RerurnRandomPos()
-    {
-        return Random.Range(0, sceneElem.GetLength(0));
-    }
-    GameObject ReturnNewGameObject(Vector2 position)
-    {
-        GameObject obj = Instantiate(elementObj, position, Quaternion.identity);
-        obj.transform.SetParent(GameObject.Find("GameObjs").transform);
-        obj.transform.localPosition = position;
-        obj.transform.localScale = obj.transform.lossyScale;
-        return obj;
-    }
     void AA(int i, int j, int stepForUpDown, int stepForLeftRight)
     {
         if (IsElement(i, j))
         {
-            if (!IsElement(i + stepForLeftRight, j + stepForUpDown)) //сверху нет елемента?
+            if (!IsElement(i + stepForLeftRight, j + stepForUpDown))
             {
                 sceneElem[i + stepForLeftRight, j + stepForUpDown] = sceneElem[i, j];
                 sceneElem[i, j] = null;
@@ -265,19 +269,22 @@ public class GamePlay : MonoBehaviour
                     = ReturnNewObjPos(i + stepForLeftRight, j + stepForUpDown);
                 generateNew = true;
             }
-            else if (IsElement(i + stepForLeftRight, j + stepForUpDown) && IsElement(i, j))
+            else
             {
-                if (AsElement(i + stepForLeftRight, j + stepForUpDown).number == AsElement(i, j).number)
+                if (IsElement(i + stepForLeftRight, j + stepForUpDown) && IsElement(i, j))
                 {
-                    Destroy(AsElement(i + stepForLeftRight, j + stepForUpDown).gameObj);
-                    GameObject obj = ReturnNewGameObject(ReturnNewObjPos(i + stepForLeftRight, j + stepForUpDown));
-                    sceneElem[i + stepForLeftRight, j + stepForUpDown]
-                        = new Element(obj, obj.transform.localPosition, AsElement(i, j).number * 2);
-                    AsElement(i + stepForLeftRight, j + stepForUpDown).gameObj.transform.localPosition
-                        = ReturnNewObjPos(i + stepForLeftRight, j + stepForUpDown);
-                    Destroy(AsElement(i, j).gameObj);
-                    sceneElem[i, j] = null;
-                    generateNew = true;
+                    if (AsElement(i + stepForLeftRight, j + stepForUpDown).number == AsElement(i, j).number)
+                    {
+                        Destroy(AsElement(i + stepForLeftRight, j + stepForUpDown).gameObj);
+                        GameObject obj = ReturnNewGameObject(ReturnNewObjPos(i + stepForLeftRight, j + stepForUpDown));
+                        sceneElem[i + stepForLeftRight, j + stepForUpDown]
+                            = new Element(obj, obj.transform.localPosition, AsElement(i, j).number * 2);
+                        AsElement(i + stepForLeftRight, j + stepForUpDown).gameObj.transform.localPosition
+                            = ReturnNewObjPos(i + stepForLeftRight, j + stepForUpDown);
+                        Destroy(AsElement(i, j).gameObj);
+                        sceneElem[i, j] = null;
+                        generateNew = true;
+                    }
                 }
             }
         }
@@ -317,5 +324,63 @@ public class GamePlay : MonoBehaviour
             return true;
         }
         return false;
+    }
+    public void Saving()
+    {
+        for (int i = 0; i < sceneElem.GetLength(0); i++)
+        {
+            for (int j = 0; j < sceneElem.GetLength(1); j++)
+            {
+                if (IsElement(i, j))
+                {
+                     PlayerPrefs.SetInt(i + ", " + j, AsElement(i, j).number);
+                }
+            }
+        }
+        PlayerPrefs.SetString("score", scoreText.text);
+        BestRecordSaving();
+    }
+    void Download()
+    {
+        for (int i = 0; i < sceneElem.GetLength(0); i++)
+        {
+            for (int j = 0; j < sceneElem.GetLength(1); j++)
+            {
+                if (PlayerPrefs.HasKey(i + ", " + j))
+                {
+                    int playerPrefs = PlayerPrefs.GetInt(i + ", " + j);
+                    GameObject obj = ReturnNewGameObject(ReturnNewObjPos(i, j));
+                    sceneElem[i, j] = new Element(obj, ReturnNewObjPos(i, j), playerPrefs);
+                    PlayerPrefs.DeleteKey(i + ", " + j);
+                }
+            }
+        }
+        if (PlayerPrefs.HasKey("score"))
+        {
+            scoreText.text = PlayerPrefs.GetString("score");
+            PlayerPrefs.DeleteKey("score");
+        }
+        else scoreText.text = "0";
+        score = System.Convert.ToInt32(scoreText.text);
+        if (PlayerPrefs.HasKey("best"))
+        {
+            bestScore.text = PlayerPrefs.GetString("best");
+        }
+    }
+    void BestRecordSaving()
+    {
+        PlayerPrefs.SetString("best", bestScore.text);
+        PlayerPrefs.Save();
+    }
+    private void OnApplicationQuit()
+    {
+        Saving();
+    }
+    private void OnApplicationPause(bool pause)
+    {
+        if (pause)
+        {
+            Saving();
+        }
     }
 }
