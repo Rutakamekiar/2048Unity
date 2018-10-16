@@ -30,149 +30,154 @@ public class GamePlay : MonoBehaviour
         {
             endPos = Input.GetTouch(0).position;
             direction = endPos - startPos;
-
-            if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
+            if (!panel.activeSelf && (Mathf.Abs(direction.x) > 100 || Mathf.Abs(direction.y) > 100))
             {
-                if (direction.x > 0)
+                if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
                 {
-                    for (int k = 0; k < sceneElem.GetLength(0); k++)
+                    if (direction.x > 0)
                     {
-                        for (int i = 0; i < sceneElem.GetLength(0); i++)
+                        for (int k = 0; k < sceneElem.GetLength(0); k++)
                         {
-                            for (int j = 0; j < sceneElem.GetLength(1); j++)
+                            for (int i = sceneElem.GetLength(0) - 1; i >= 0; i--)
                             {
-                                if (i != sceneElem.GetLength(0) - 1)
+                                for (int j = 0; j < sceneElem.GetLength(1); j++)
                                 {
-                                    AA(i, j, 0, 1);
+                                    if (i != sceneElem.GetLength(0) - 1)
+                                    {
+                                        AA(i, j, 0, 1);
+                                    }
                                 }
                             }
                         }
+                        GenerateElem();
                     }
-                    GenerateElem();
+                    else
+                    {
+                        for (int k = 0; k < sceneElem.GetLength(0); k++)
+                        {
+                            for (int i = 0; i < sceneElem.GetLength(0); i++)
+                            {
+                                for (int j = 0; j < sceneElem.GetLength(1); j++)
+                                {
+                                    if (i != 0)
+                                    {
+                                        AA(i, j, 0, -1);
+                                    }
+                                }
+                            }
+                        }
+                        GenerateElem();
+                    }
                 }
                 else
                 {
-                    for (int k = 0; k < sceneElem.GetLength(0); k++)
+                    if (direction.y > 0)
                     {
-                        for (int i = sceneElem.GetLength(0) - 1; i > 0; i--)
+                        for (int k = 0; k < sceneElem.GetLength(0); k++)
                         {
-                            for (int j = 0; j < sceneElem.GetLength(1); j++)
+                            for (int i = 0; i < sceneElem.GetLength(0); i++)
                             {
-                                if (i != 0)
+                                for (int j = sceneElem.GetLength(1) - 1; j >= 0; j--)
                                 {
-                                    AA(i, j, 0, -1);
+                                    if (j != sceneElem.GetLength(1) - 1)
+                                    {
+                                        AA(i, j, 1, 0);
+                                    }
                                 }
                             }
                         }
+                        GenerateElem();
                     }
-                    GenerateElem();
-                }
-            }
-            else
-            {
-                if (direction.y > 0)
-                {
-                    for (int k = 0; k < sceneElem.GetLength(0); k++)
+                    else
                     {
-                        for (int i = 0; i < sceneElem.GetLength(0); i++)
+                        for (int k = 0; k < sceneElem.GetLength(0); k++)
                         {
-                            for (int j = sceneElem.GetLength(1) - 1; j >= 0; j--)
+                            for (int i = 0; i < sceneElem.GetLength(0); i++)
                             {
-                                if (j != sceneElem.GetLength(1) - 1)
+                                for (int j = 0; j < sceneElem.GetLength(1); j++)
                                 {
-                                    AA(i, j, 1, 0);
+                                    if (j != 0)
+                                    {
+                                        AA(i, j, -1, 0);
+                                    }
                                 }
                             }
                         }
+                        GenerateElem();
                     }
-                    GenerateElem();
                 }
-                else
+            }
+        }
+        if (!panel.activeSelf)
+        {
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                for (int k = 0; k < sceneElem.GetLength(0); k++)
                 {
-                    for (int k = 0; k < sceneElem.GetLength(0); k++)
+                    for (int i = 0; i < sceneElem.GetLength(0); i++)
                     {
-                        for (int i = 0; i < sceneElem.GetLength(0); i++)
+                        for (int j = sceneElem.GetLength(1) - 1; j >= 0; j--)
                         {
-                            for (int j = 0; j < sceneElem.GetLength(1); j++)
+                            if (j != sceneElem.GetLength(1) - 1)
                             {
-                                if (j != 0)
-                                {
-                                    AA(i, j, -1, 0);
-                                }
+                                AA(i, j, 1, 0);
                             }
                         }
                     }
-                    GenerateElem();
                 }
+                GenerateElem();
             }
-        }
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            for (int k = 0; k < sceneElem.GetLength(0); k++)
+            else if (Input.GetKeyDown(KeyCode.S))
             {
-                for (int i = 0; i < sceneElem.GetLength(0); i++)
+                for (int k = 0; k < sceneElem.GetLength(0); k++)
                 {
-                    for (int j = sceneElem.GetLength(1) - 1; j >= 0; j--)
+                    for (int i = 0; i < sceneElem.GetLength(0); i++)
                     {
-                        if (j != sceneElem.GetLength(1) - 1)
+                        for (int j = 0; j < sceneElem.GetLength(1); j++)
                         {
-                            AA(i, j, 1, 0);
+                            if (j != 0)
+                            {
+                                AA(i, j, -1, 0);
+                            }
                         }
                     }
                 }
+                GenerateElem();
             }
-            GenerateElem();
-        }
-        else if (Input.GetKeyDown(KeyCode.S))
-        {
-            for (int k = 0; k < sceneElem.GetLength(0); k++)
+            else if (Input.GetKeyDown(KeyCode.D))
             {
-                for (int i = 0; i < sceneElem.GetLength(0); i++)
+                for (int k = 0; k < sceneElem.GetLength(0); k++)
                 {
-                    for (int j = 0; j < sceneElem.GetLength(1); j++)
+                    for (int i = sceneElem.GetLength(0) - 1; i >= 0; i--)
                     {
-                        if (j != 0)
+                        for (int j = 0; j < sceneElem.GetLength(1); j++)
                         {
-                            AA(i, j, -1, 0);
+                            if (i != sceneElem.GetLength(0) - 1)
+                            {
+                                AA(i, j, 0, 1);
+                            }
                         }
                     }
                 }
+                GenerateElem();
             }
-            GenerateElem();
-        }
-        else if (Input.GetKeyDown(KeyCode.D))
-        {
-            for (int k = 0; k < sceneElem.GetLength(0); k++)
+            else if (Input.GetKeyDown(KeyCode.A))
             {
-                for (int i = 0; i < sceneElem.GetLength(0); i++)
+                for (int k = 0; k < sceneElem.GetLength(0); k++)
                 {
-                    for (int j = 0; j < sceneElem.GetLength(1); j++)
+                    for (int i = 0; i < sceneElem.GetLength(0); i++)
                     {
-                        if (i != sceneElem.GetLength(0) - 1)
+                        for (int j = 0; j < sceneElem.GetLength(1); j++)
                         {
-                            AA(i, j, 0, 1);
+                            if (i != 0)
+                            {
+                                AA(i, j, 0, -1);
+                            }
                         }
                     }
                 }
+                GenerateElem();
             }
-            GenerateElem();
-        }
-        else if (Input.GetKeyDown(KeyCode.A))
-        {
-            for (int k = 0; k < sceneElem.GetLength(0); k++)
-            {
-                for (int i = sceneElem.GetLength(0) - 1; i > 0; i--)
-                {
-                    for (int j = 0; j < sceneElem.GetLength(1); j++)
-                    {
-                        if (i != 0)
-                        {
-                            AA(i, j, 0, -1);
-                        }
-                    }
-                }
-            }
-            GenerateElem();
         }
     }
     bool IsElement(int x, int y)
